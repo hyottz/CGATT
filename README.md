@@ -1,4 +1,4 @@
-# Deepfake_Detection
+# Deepfake detection
 
 - 논문링크 추후에
 

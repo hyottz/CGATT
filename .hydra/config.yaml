@@ -1,0 +1,159 @@
+checkpoint:
+  _target_: pytorch_lightning.callbacks.ModelCheckpoint
+  save_last: false
+data:
+  dataset:
+    name: LRW500
+    n_classes: 500
+    train_len: 488763
+    sample_rate: 16000
+    fps: 25
+    limit_val_batches: 1.0
+  dataset_df:
+    name_ff: FaceForensics++
+    name_cdf: CelebDF
+    name_dfdc: dfdc
+    max_frames_per_video: 270
+    max_frames_per_video_val: 110
+    ds_type: c23
+    fps: 25
+    videos_per_type: 720
+    train_len: 6361
+    aggregate_scores: false
+    only_ff_val: false
+    cdf_dfdc_test: true
+    fake_types_train:
+    - Deepfakes
+    - FaceSwap
+    - Face2Face
+    - NeuralTextures
+    types_val:
+    - Real
+    - Deepfakes
+    - FaceSwap
+    - Face2Face
+    - NeuralTextures
+    - FaceShifter
+  channel:
+    obj:
+      _target_: pytorchvideo.transforms.Normalize
+      mean:
+      - 0.485
+      - 0.456
+      - 0.406
+      std:
+      - 0.229
+      - 0.224
+      - 0.225
+    in_video_channels: 3
+    grayscale_prob: 0.5
+  crop_type:
+    random_crop_dim: 140
+    resize_dim: 112
+    random_erasing_prob: 0.5
+    random_erasing_scale:
+    - 0.02
+    - 0.33
+    video_dir: cropped_faces
+    video_dir_df: cropped_faces
+    train_csv: train.csv
+    val_csv: val.csv
+  root:
+    root: /home/daiv/바탕화면/taho/RealForensics/data
+  n_fft: 512
+  n_mels: 80
+  all_but: null
+  audio2video: 4
+  win_length: 320
+  aug_prob: 1.0
+  horizontal_flip_prob: 0.5
+  num_frames: 25
+  time_mask_video: 12
+  n_time_mask_video: 1
+  mask_version: v1
+  time_mask_prob_video: 0.5
+  time_mask_targets: false
+  clean_targets: true
+debug:
+  log_gradients: false
+  deterministic: false
+  profiler: null
+  save_av_sample: false
+logger:
+  _target_: pytorch_lightning.loggers.WandbLogger
+  log_model: true
+  name: ${experiment_name}
+  offline: false
+  project: ${project_name}
+  mode: online
+logging:
+  logging_interval: step
+model:
+  visual_backbone:
+    obj:
+      _target_: models.backbones.gruatt.GRU_ATT
+      model_depth: 101
+      input_channel: ${data.channel.in_video_channels}
+    output_dim: 2048
+  audio_backbone:
+    obj:
+      _target_: models.backbones.resnet18_gray_framewise.ResNet18Gray
+    output_dim: 512
+  df_predictor:
+    _target_: models.linear.MeanLinear
+    norm_linear: true
+    out_dim: 1
+  projector:
+    _target_: models.mlps.LinearProjector
+    out_dim: ${model.projection_size}
+  predictor:
+    _target_: models.transformer.TransformerEncoder
+    in_dim: ${model.projection_size}
+    out_dim: ${model.projection_size}
+    dim: 512
+    heads: 8
+    mlp_dim: 2048
+    depth: 1
+    dropout: 0
+    use_mlp_head: true
+    norm: bn
+  obj:
+    _target_: models.model_combined.ModelCombined
+  projection_size: 256
+  sync_batchnorm: true
+  relative_bs: 83
+  ssl_weight: 0.3
+  logit_adj: true
+  init_byolav: true
+  weights_filename: GRUATT_nobi_0.3sslweight_stage2.pth
+optimizer:
+  optim:
+    obj:
+      _target_: adamp.AdamP
+      weight_decay: 0.01
+    scale_sqrt: true
+  base_lr_video: 0.0007
+  base_lr_audio: 0.0007
+  base_lr_pred: 0.0007
+  cosine_decay: false
+  warmup_epochs: 5
+trainer:
+  precision: 16
+  accelerator: ddp
+  profiler: ${debug.profiler}
+  max_epochs: 150
+  gpus: -1
+  sync_batchnorm: true
+  num_sanity_val_steps: 5
+  limit_val_batches: 1.0
+  accumulate_grad_batches: 1
+  multiple_trainloader_mode: min_size
+  val_check_interval: 1.0
+mode: sup
+only_df: true
+method: combined
+project_name: ff
+experiment_name: null
+batch_size: 32
+num_workers: 8
+gpus: null

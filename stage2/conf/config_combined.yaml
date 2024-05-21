@@ -1,0 +1,21 @@
+defaults:
+  - checkpoint: simple
+  - data: combined
+  - debug: no_debug
+  - logger: online
+  - logging: default
+  - model: combined
+  - optimizer: df_default
+  - trainer: train
+mode: sup
+only_df: True ### False
+method: combined
+project_name: ff
+experiment_name:
+batch_size: 32
+num_workers: 8
+gpus:
+# 기본 작업 경로를 outputs이 아닌 현재 디렉토리로 변경
+hydra:
+  run:
+    dir: .

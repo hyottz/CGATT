@@ -31,3 +31,6 @@ Our 베이스라인 모델 : [Real forensics](https://github.com/ahaliassos/Real
 CGATT모델을 통하여 기존 모델보다 ssl_weight 를 0.3으로 조정하였을 때, 가장 좋은 결과가 나올 수 있었습니다. FaceShifter, CelebDf 에서 모두 기존의 CSN 을 이용한 성능보다 더 높게 나옴을 확인할 수 있습니다.
 
 저희는 가장 높게 나온 성능의 CGATT 체크포인트 파일을 제공합니다.
+
+[stage1](https://drive.google.com/file/d/1kSJJ4FhJ4jv6FG-O7Y_F0HpI8k5Kxz6l/view?usp=sharing)
+[stage2](https://drive.google.com/file/d/1c3KhXD2OcdXo33ZgVqpnVUhs7sO4u7k7/view?usp=sharing)
